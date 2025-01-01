@@ -6,8 +6,20 @@ from telethon.errors import SessionPasswordNeededError
 from telethon.tl.types import DocumentAttributeAudio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
-from google.colab import drive
-drive.mount('/content/drive')
+from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+#from google.colab import drive
+#drive.mount('/content/drive')
+
+# إعداد Google Drive API
+def initialize_drive():
+    SCOPES = ['https://www.googleapis.com/auth/drive']
+    creds = Credentials.from_authorized_user_file('credentials.json', SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+    return service
+
+# تهيئة Google Drive
+drive_service = initialize_drive()
 
 nest_asyncio.apply()
 
