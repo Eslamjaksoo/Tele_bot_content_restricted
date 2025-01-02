@@ -202,8 +202,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                    preset="fast",  # سرعة المعالجة
                    crf=22  # جودة الضغط
                    ).run()
-               except ffmpeg.Error as e:
-                      await update.message.reply_text(f"حدث خطأ أثناء التحويل: {str(e)}")
+               
 
                     os.remove(file_path)  # حذف الملف الأصلي بعد التحويل
                     file_path = mp4_path
