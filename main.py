@@ -190,26 +190,25 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await progress_message.edit_text("جاري إرسال الملف...")
 
             if file_path.endswith('.MOV'):  # التحقق إذا كان الملف بصيغة MOV
-             # تحويل الملف إلى MP4 إذا لزم الأمر
                mp4_path = os.path.splitext(file_path)[0] + '.mp4'
                try:
                    await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4...")
 
-                   # استخدام مكتبة ffmpeg-python للتحويل
+                    # استخدام مكتبة ffmpeg-python للتحويل
                    ffmpeg.input(file_path).output(
                    mp4_path,
                    vcodec="libx264",  # ترميز الفيديو
                    preset="fast",  # سرعة المعالجة
                    crf=22  # جودة الضغط
                    ).run()
-               
 
-                    os.remove(file_path)  # حذف الملف الأصلي بعد التحويل
-                    file_path = mp4_path
-                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
-                except subprocess.CalledProcessError as e:
-                    await update.message.reply_text(f"فشل تحويل الملف إلى MP4: {e}. سيتم إرسال الملف كما هو.")
+                   # حذف الملف الأصلي بعد التحويل
+                   os.remove(file_path)
+                   file_path = mp4_path
+                   await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
 
+               except ffmpeg.Error as e:  # التعامل مع استثناء ffmpeg
+                      await update.message.reply_text(f"فشل تحويل الملف إلى MP4: {str(e)}. سيتم إرسال الملف كما هو.")
 
             # إرسال الفيديو كرسالة فيديو (Video Note)
             if message.media.document.mime_type.startswith("video"):
