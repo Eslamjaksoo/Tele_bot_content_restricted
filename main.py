@@ -190,16 +190,20 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await progress_message.edit_text("جاري إرسال الملف...")
 
             if file_path.endswith('.MOV'):  # التحقق إذا كان الملف بصيغة MOV
-                # تحويل الملف إلى MP4 إذا لزم الأمر
-                mp4_path = file_path.rsplit('.', 1)[0] + '.mp4'
-                try:
-                    await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4...")
+             # تحويل الملف إلى MP4 إذا لزم الأمر
+               mp4_path = os.path.splitext(file_path)[0] + '.mp4'
+               try:
+                   await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4...")
 
-                    # محاولة التحويل بغض النظر عن الامتداد
-                    subprocess.run(
-                        ["ffmpeg", "-i", file_path, "-c:v", "libx264", "-preset", "fast", "-crf", "22", mp4_path],
-                        check=True
-                    )
+                   # استخدام مكتبة ffmpeg-python للتحويل
+                   ffmpeg.input(file_path).output(
+                   mp4_path,
+                   vcodec="libx264",  # ترميز الفيديو
+                   preset="fast",  # سرعة المعالجة
+                   crf=22  # جودة الضغط
+                   ).run()
+               except ffmpeg.Error as e:
+                      await update.message.reply_text(f"حدث خطأ أثناء التحويل: {str(e)}")
 
                     os.remove(file_path)  # حذف الملف الأصلي بعد التحويل
                     file_path = mp4_path
