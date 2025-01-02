@@ -1,2 +1,2 @@
-pip install ffmpeg
+apt-get ffmpeg
 worker: python main.py
