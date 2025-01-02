@@ -1,5 +1,6 @@
 import os
 import subprocess
+import ffmpeg
 import nest_asyncio
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
