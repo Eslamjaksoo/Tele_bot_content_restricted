@@ -1,3 +1,4 @@
+apt-get ffmpeg
 import os
 import subprocess
 import ffmpeg
