@@ -207,9 +207,9 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                    file_path = mp4_path
                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
 
-               except ffmpeg.Error as e:  # التعامل مع استثناء ffmpeg
+               except Exception as e:  # التقاط جميع الأخطاء
                       await update.message.reply_text(f"فشل تحويل الملف إلى MP4: {str(e)}. سيتم إرسال الملف كما هو.")
-
+ 
             # إرسال الفيديو كرسالة فيديو (Video Note)
             if message.media.document.mime_type.startswith("video"):
                 await client.send_file(
