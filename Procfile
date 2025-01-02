@@ -1,1 +1,2 @@
-web: apt-get update && apt-get install -y ffmpeg && python main.py
+pip install ffmpeg
+worker: python main.py
