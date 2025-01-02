@@ -219,6 +219,15 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     supports_streaming=True,
                     video_note=True
                 )
+                # إرسال الملف كـ Audio إذا كان صوتيًا 
+            elif message.media.document.mime_type.startswith("audio"):
+                duration = message.media.document.attributes[0].duration if hasattr(message.media.document.attributes[0], "duration") else 0                
+                await client.send_file(                    
+                   entity=update.message.chat_id,                    
+                   file=file_path,                    
+                   caption="",                    
+                   attributes=[DocumentAttributeAudio(duration=duration)]                
+                )
             else:
                 await client.send_file(
                     entity=update.message.chat_id,
