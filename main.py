@@ -1,4 +1,5 @@
 import os
+import ffmpeg
 import subprocess
 import nest_asyncio
 from telethon import TelegramClient
