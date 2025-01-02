@@ -1,4 +1,4 @@
-apt-get ffmpeg
+apt-get install -y ffmpeg
 import os
 import subprocess
 import ffmpeg
