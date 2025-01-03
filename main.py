@@ -137,7 +137,7 @@ async def process_phone(update, context):
                 if not client.is_connected():
                     await client.connect()
 
-                await update.message.reply_text("تم العثور على جلسة صالحة في Google Drive واستخدامها!")
+                await update.message.reply_text("تم تسجيل الدخول مسبقًا! أرسل الآن رابط الملف لتحميله.")
                 clients[user_id] = client
                 phone_numbers[user_id] = phone_number
                 return FILE  # الانتقال للمرحلة التالية
