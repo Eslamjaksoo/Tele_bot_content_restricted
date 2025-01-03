@@ -25,6 +25,9 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials  # استخدام مكتبة الحساب الخدمي
 
+# معرف المجلد الذي شاركته مع حساب الخدمة
+FOLDER_ID = '1KQuUFlVRXkwNA6I11caLJV-W6ALiEN61'
+
 # إعداد Google Drive API باستخدام Service Account
 def initialize_drive():
     SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -101,8 +104,21 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
 
     # تخزين ملف الجلسة داخل Google Drive
-    session_file = os.path.join(DRIVE_PATH, f'session_{user_id}.session')
+    #session_file = os.path.join(DRIVE_PATH, f'session_{user_id}.session')
+     
+    #####↓↓↓↓↓
+    # إنشاء ملف الجلسة على Google Drive داخل المجلد المشترك
+    file_metadata = {
+    'name': f'session_{user_id}.session',  # اسم الملف
+    'parents': [FOLDER_ID],               # حدد المجلد الأب
+    'mimeType': 'application/octet-stream'  # نوع الملف (اختياري)
+     }
 
+     media = MediaFileUpload(f'/tmp/session_{user_id}.session', resumable=True)  # رفع الملف من مجلد مؤقت
+     uploaded_file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+     print(f"تم إنشاء ملف الجلسة: File ID: {uploaded_file.get('id')}")
+     ######^^^^^^
+    
     # حذف الجلسة إذا كانت تالفة
     if os.path.exists(session_file):
         try:
@@ -112,8 +128,13 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 os.remove(session_file)  # حذف الجلسة إذا لم تكن صالحة
             await temp_client.disconnect()
         except Exception:
-            os.remove(session_file)  # حذف الجلسة إذا كانت تالفة
-
+            #os.remove(session_file)  # حذف الجلسة إذا كانت تالفة
+            
+            # حذف الجلسة من Google Drive إذا كانت تالفة
+            file_id = 'id_of_the_corrupted_file'  # حدد File ID الخاص بالجلسة
+            drive_service.files().delete(fileId=file_id).execute()
+            print(f"تم حذف الجلسة التالفة: File ID: {file_id}")
+            
     # إنشاء جلسة جديدة
     client = TelegramClient(session_file, api_id, api_hash)
     clients[user_id] = client
