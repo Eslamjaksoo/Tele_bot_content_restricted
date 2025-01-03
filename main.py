@@ -111,13 +111,17 @@ async def process_phone(update, context):
             client = TelegramClient(session_file, api_id, api_hash)
             await client.connect()
             if await client.is_user_authorized():
+                # إذا كانت الجلسة صالحة، استخدمها
                 await update.message.reply_text("تم العثور على جلسة صالحة وتم استخدامها!")
                 await client.disconnect()
+                clients[user_id] = client
+                phone_numbers[user_id] = phone_number
                 return FILE  # انتقل إلى المرحلة التالية (رفع الملف أو استخدامه)
             else:
                 raise Exception("ملف الجلسة موجود ولكنه غير صالح.")
         except Exception as e:
-            # حذف الملف التالف
+            # إذا كان الملف غير صالح، احذفه
+            print(f"ملف الجلسة تالف: {e}")
             os.remove(session_file)
             await update.message.reply_text("تم العثور على ملف جلسة تالف. تم حذفه.")
         finally:
