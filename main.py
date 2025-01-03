@@ -99,6 +99,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def process_phone(update, context):
     # إعداد المتغيرات
+    print("Starting the process_phone function...")
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
     session_file = f"/tmp/session_{user_id}.session"
@@ -119,6 +120,7 @@ async def process_phone(update, context):
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
+    print("Starting drive session")
     try:
         print("sttart here")
         await client.connect()
