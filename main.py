@@ -40,7 +40,7 @@ try:
     # كود اختبار إنشاء ملف
     file_metadata = {
         'name': 'test_creation.txt',  # اسم الملف
-        'parents': FOLDER_ID,
+        'parents': [FOLDER_ID],
         'mimeType': 'text/plain',     # نوع الملف
     }
     test_file = drive_service.files().create(body=file_metadata, fields='id').execute()
