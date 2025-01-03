@@ -121,15 +121,19 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
      ######^^^^^^
     
     # حذف الجلسة إذا كانت تالفة
+    # التحقق من الجلسة المحلية
     if os.path.exists(session_file):
         try:
             temp_client = TelegramClient(session_file, api_id, api_hash)
             await temp_client.connect()
             if not await temp_client.is_user_authorized():
-                os.remove(session_file)  # حذف الجلسة إذا لم تكن صالحة
+                print("الجلسة تالفة. سيتم حذفها.")
+                os.remove(session_file)
             await temp_client.disconnect()
         except Exception:
-            #os.remove(session_file)  # حذف الجلسة إذا كانت تالفة
+            print("حدث خطأ أثناء التحقق من الجلسة. سيتم حذفها.")
+            os.remove(session_file)
+
             
             # حذف الجلسة من Google Drive إذا كانت تالفة
             file_id = 'id_of_the_corrupted_file'  # حدد File ID الخاص بالجلسة
@@ -141,10 +145,19 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
-    media = MediaFileUpload(f'/tmp/session_{user_id}.session', resumable=True)  # رفع الملف من مجلد مؤقت
-    uploaded_file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    print(f"تم إنشاء ملف الجلسة: File ID: {uploaded_file.get('id')}")
-     
+    try:
+        await client.connect()
+        if await client.is_user_authorized():
+            # رفع الجلسة إلى Google Drive بعد التأكد
+            upload_media = MediaFileUpload(session_file, resumable=True)
+            uploaded_file = drive_service.files().create(body=file_metadata, media_body=upload_media, fields='id').execute()
+            print(f"تم رفع الجلسة إلى Google Drive: File ID: {uploaded_file.get('id')}")
+            await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
+            return FILE
+    except Exception as e:
+        await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
+        return PHONE
+    
     
     try:
         await client.connect()
