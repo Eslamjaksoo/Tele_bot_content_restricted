@@ -102,7 +102,7 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phone_number = update.message.text.strip()
 
     # إعداد بيانات ملف الجلسة
-    session_file = f"/tmp/session_{user_id}.session"
+    session_file = f"/session_{user_id}.session"
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
 
