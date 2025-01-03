@@ -32,6 +32,7 @@ def initialize_drive():
     service = build('drive', 'v3', credentials=creds)
     return service
 #####↓↓↓↓↓↓
+FOLDER_ID = '1KQuUFlVRXkwNA6I11caLJV-W6ALiEN61'
 try:
     drive_service = initialize_drive()
     print("تم الاتصال بـ Google Drive بنجاح.")
@@ -39,6 +40,7 @@ try:
     # كود اختبار إنشاء ملف
     file_metadata = {
         'name': 'test_creation.txt',  # اسم الملف
+        'parents': FOLDER_ID,
         'mimeType': 'text/plain',     # نوع الملف
     }
     test_file = drive_service.files().create(body=file_metadata, fields='id').execute()
