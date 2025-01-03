@@ -109,10 +109,26 @@ async def process_phone(update, context):
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
+    # التحقق من ملف الجلسة
+    if os.path.exists(session_file):
+        try:
+            await client.connect()
+            if await client.is_user_authorized():
+                await update.message.reply_text("تم العثور على ملف جلسة صالح وتم استخدامه بنجاح! يمكنك الآن إرسال رابط الملف لتحميله.")
+                return FILE
+            else:
+                raise Exception("ملف الجلسة موجود ولكنه غير صالح.")
+        except Exception as e:
+            os.remove(session_file)  # حذف الملف إذا كان تالفًا
+            await update.message.reply_text("تم العثور على ملف جلسة تالف. جارٍ إنشاء ملف جديد...")
+        finally:
+            await client.disconnect()
+
+    # إنشاء جلسة جديدة إذا لم يكن هناك ملف صالح
     try:
         await client.connect()
         print("تم الاتصال بـ Telegram.")
-        
+
         # إرسال كود التحقق
         await client.send_code_request(phone_number)
         print("تم إرسال رمز التحقق.")
@@ -122,7 +138,8 @@ async def process_phone(update, context):
     except Exception as e:
         print(f"حدث خطأ أثناء إرسال كود التحقق: {e}")
         await update.message.reply_text(f"حدث خطأ: {e}")
-        return PHONE    
+        return PHONE
+
 
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -139,19 +156,6 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session_file = f"/tmp/session_{user_id}.session"
 
     try:
-        # إذا كان ملف الجلسة موجودًا، تحقق من صلاحيته
-        if os.path.exists(session_file):
-            try:
-                await client.connect()
-                if await client.is_user_authorized():
-                    await update.message.reply_text("تم استخدام ملف الجلسة الموجود بنجاح!")
-                else:
-                    raise Exception("ملف الجلسة موجود ولكنه غير صالح.")
-            except Exception as e:
-                # إذا كان الملف غير صالح، احذفه
-                os.remove(session_file)
-                await update.message.reply_text("تم العثور على ملف جلسة تالف. جارٍ إنشاء ملف جديد...")
-        
         # تسجيل الدخول باستخدام الرمز
         await client.sign_in(phone=phone_number, code=code)
 
@@ -187,6 +191,7 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"حدث خطأ أثناء تسجيل الدخول: {e}")
         return CODE
+
 
 
 async def process_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
