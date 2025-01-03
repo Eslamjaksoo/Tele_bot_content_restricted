@@ -133,8 +133,11 @@ async def process_phone(update, context):
             client = TelegramClient(session_file, api_id, api_hash)
             await client.connect()
             if await client.is_user_authorized():
+                # التأكد من أن العميل متصل
+                if not client.is_connected():
+                    await client.connect()
+
                 await update.message.reply_text("تم العثور على جلسة صالحة في Google Drive واستخدامها!")
-                await client.disconnect()
                 clients[user_id] = client
                 phone_numbers[user_id] = phone_number
                 return FILE  # الانتقال للمرحلة التالية
@@ -173,6 +176,7 @@ async def process_phone(update, context):
         print(f"Error while sending verification code: {e}")
         await update.message.reply_text(f"حدث خطأ: {e}")
         return PHONE
+
 
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
