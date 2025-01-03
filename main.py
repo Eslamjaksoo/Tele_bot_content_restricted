@@ -101,6 +101,8 @@ async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
 
+    session_file = f"/tmp/session_{update.message.from_user.id}.session"
+    
     api_id = 26466946
     api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
 
