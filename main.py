@@ -31,13 +31,28 @@ def initialize_drive():
     creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
     service = build('drive', 'v3', credentials=creds)
     return service
-
-# تهيئة Google Drive
+#####↓↓↓↓↓↓
 try:
     drive_service = initialize_drive()
     print("تم الاتصال بـ Google Drive بنجاح.")
+    
+    # كود اختبار إنشاء ملف
+    file_metadata = {
+        'name': 'test_creation.txt',  # اسم الملف
+        'mimeType': 'text/plain',     # نوع الملف
+    }
+    test_file = drive_service.files().create(body=file_metadata, fields='id').execute()
+    print(f"تم إنشاء ملف اختبار بنجاح: File ID: {test_file.get('id')}")
+
 except Exception as e:
-    print(f"حدث خطأ أثناء الاتصال بـ Google Drive: {e}")
+    print(f"حدث خطأ أثناء الاتصال بـ Google Drive أو اختبار إنشاء الملف: {e}")
+#####^^^^^
+# تهيئة Google Drive
+#try:
+#    drive_service = initialize_drive()
+#    print("تم الاتصال بـ Google Drive بنجاح.")
+#except Exception as e:
+#    print(f"حدث خطأ أثناء الاتصال بـ Google Drive: {e}")
 
 #يعرف اذا كان اداه التحويل موجودة ام لا
 
