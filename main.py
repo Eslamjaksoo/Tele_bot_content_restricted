@@ -125,10 +125,10 @@ async def process_phone(update, context):
         #try was end here before
         
         # طلب رمز التحقق
-        await client.send_code_request(phone_number)
-        print("تم إرسال رمز التحقق.")
-        await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
-        return CODE
+    await client.send_code_request(phone_number)
+    print("تم إرسال رمز التحقق.")
+    await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
+    return CODE
 
     try:
         print("sttart here")
