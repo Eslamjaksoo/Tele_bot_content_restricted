@@ -190,7 +190,11 @@ async def process_phone(update, context):
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         return PHONE
 
-
+if await client.is_user_authorized():
+            print("222المستخدم مصرح له مسبقًا.")
+        else:
+            print("222المستخدم غير مصرح له. سيتم إرسال رمز التحقق.")
+        
 
 async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
