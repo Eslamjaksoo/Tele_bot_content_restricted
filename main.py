@@ -98,6 +98,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return PHONE
 
 async def process_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    drive_service = initialize_drive()
     user_id = update.message.from_user.id
     phone_number = update.message.text.strip()
 
