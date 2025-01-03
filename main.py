@@ -181,62 +181,12 @@ async def process_phone(update, context):
         #try was end here before
         
         # طلب رمز التحقق
-
         
          await client.send_code_request(phone_number)
          print("تم إرسال رمز التحقق.")
          await update.message.reply_text("تم إرسال رمز التحقق إلى رقمك. الرجاء إدخال الرمز (مثل: 2 2 9 3 0):")
          return CODE
 
-         if await client.is_user_authorized():
-            print("المستخدم مصرح له مسبقًا.")
-            # رفع الجلسة إلى Google Drive
-            try:
-                if not os.path.exists(session_file):
-                    print("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
-                    await update.message.reply_text("خطأ: ملف الجلسة غير موجود محليًا قبل الرفع.")
-                    return PHONE
-
-                print("بدء عملية الرفع إلى Google Drive...")
-
-                # التحقق من وجود المجلد
-                print(f"التحقق من معرف المجلد: {FOLDER_ID}")
-                if not FOLDER_ID:
-                    print("خطأ: معرف المجلد غير موجود.")
-                    await update.message.reply_text("خطأ: معرف المجلد غير موجود.")
-                    return PHONE
-
-                # إنشاء MediaFileUpload
-                try:
-                    upload_media = MediaFileUpload(session_file, resumable=True)
-                    print(f"تم إنشاء MediaFileUpload: {upload_media}")
-                except Exception as e:
-                    print(f"خطأ أثناء إنشاء MediaFileUpload: {e}")
-                    await update.message.reply_text("خطأ أثناء إنشاء MediaFileUpload.")
-                    return PHONE
-
-                # تنفيذ الرفع
-                try:
-                    print("رفع الملف إلى Google Drive...")
-                    uploaded_file = drive_service.files().create(
-                        body=file_metadata,
-                        media_body=upload_media,
-                        fields='id'
-                    ).execute()
-                    print(f"تم رفع الجلسة إلى Google Drive بنجاح: File ID: {uploaded_file.get('id')}")
-                    await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
-                    return FILE
-                except Exception as e:
-                    print(f"خطأ أثناء رفع الملف إلى Google Drive: {e}")
-                    await update.message.reply_text(f"خطأ أثناء رفع الملف إلى Google Drive: {e}")
-                    return PHONE
-
-            except Exception as upload_error:
-                print(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
-                await update.message.reply_text(f"خطأ أثناء رفع الجلسة إلى Google Drive: {upload_error}")
-                return PHONE
-
-    
     except Exception as e:
         print(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
         await update.message.reply_text(f"حدث خطأ أثناء إنشاء الجلسة: {e}")
