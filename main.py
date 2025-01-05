@@ -296,6 +296,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         preset="fast",  # سرعة المعالجة
                         crf=22  # جودة الضغط
                     )
+                    subprocess.run(["which", "ffmpeg"], check=True)
                     print("إعداد ffmpeg تم بنجاح، جاري التنفيذ...")
 
                     # تشغيل التحويل
