@@ -294,8 +294,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         mp4_path,
                         codec="mpeg4",          # ترميز MPEG4
                         audio_codec="aac",      # ترميز الصوت AAC
-                        progress_bar=False      # تعطيل شريط التقدم
-                    )
+                        )
 
                     # إغلاق الملف
                     clip.close()
