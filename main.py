@@ -296,7 +296,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         codec="libx264",       # ترميز الفيديو
                         audio_codec="aac",     # ترميز الصوت
                         preset="medium",       # تحسين الجودة مع سرعة معقولة
-                        ffmpeg_params=["-crf", "18", "-b:v", "3M"]  # جودة شبه مثالية
+                        ffmpeg_params=["-crf", "20", "-b:v", "3M"]  # جودة شبه مثالية
                     )
 
                     # إغلاق الملف
