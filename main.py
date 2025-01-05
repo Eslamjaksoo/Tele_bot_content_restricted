@@ -295,8 +295,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     clip.write_videofile(
                         mp4_path,
                         codec="copy",        # نسخ الفيديو دون إعادة ترميز
-                        audio_codec="copy"   # نسخ الصوت دون إعادة ترميز
-                    )
+                            )
 
                     # إغلاق الملف
                     clip.close()
