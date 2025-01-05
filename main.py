@@ -10,8 +10,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
-from moviepy.editor import VideoFileClip  # استيراد VideoFileClip
-
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 # إعداد Google Drive API
 #def initialize_drive():
