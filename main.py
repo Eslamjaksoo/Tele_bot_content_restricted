@@ -282,27 +282,46 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             await progress_message.edit_text("جاري إرسال الملف...")
 
+            # here start convert step to mp4
             if file_path.endswith('.MOV'):  # التحقق إذا كان الملف بصيغة MOV
-               mp4_path = os.path.splitext(file_path)[0] + '.mp4'
-               try:
-                   await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4...")
+                mp4_path = os.path.splitext(file_path)[0] + '.mp4'
+                try:
+                    await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4...")
+                    print(f"تحويل الملف: {file_path} إلى {mp4_path}")
 
                     # استخدام مكتبة ffmpeg-python للتحويل
-                   ffmpeg.input(file_path).output(
-                   mp4_path,
-                   vcodec="libx264",  # ترميز الفيديو
-                   preset="fast",  # سرعة المعالجة
-                   crf=22  # جودة الضغط
-                   ).run()
+                    process = ffmpeg.input(file_path).output(
+                        mp4_path,
+                        vcodec="libx264",  # ترميز الفيديو
+                        preset="fast",  # سرعة المعالجة
+                        crf=22  # جودة الضغط
+                    )
+                    print("إعداد ffmpeg تم بنجاح، جاري التنفيذ...")
 
-                   # حذف الملف الأصلي بعد التحويل
-                   os.remove(file_path)
-                   file_path = mp4_path
-                   await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
+                    # تشغيل التحويل
+                    process.run(overwrite_output=True)
+                    print(f"تم تحويل الملف بنجاح إلى: {mp4_path}")
 
-               except Exception as e:  # التقاط جميع الأخطاء
-                      await update.message.reply_text(f"فشل تحويل الملف إلى MP4: {str(e)}. سيتم إرسال الملف كما هو.")
- 
+                    # حذف الملف الأصلي بعد التأكد من نجاح التحويل
+                    if os.path.exists(mp4_path):
+                        os.remove(file_path)
+                        print(f"تم حذف الملف الأصلي: {file_path}")
+                    else:
+                        print("الملف المحول غير موجود!")
+
+                    file_path = mp4_path
+                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
+
+                except ffmpeg.Error as e:
+                    error_message = str(e.stderr) if e.stderr else str(e)
+                    print(f"خطأ أثناء تشغيل ffmpeg: {error_message}")
+                    await update.message.reply_text(f"فشل تحويل الملف إلى MP4 بسبب خطأ: {error_message}. سيتم إرسال الملف كما هو.")
+
+                except Exception as e:
+                    print(f"خطأ غير متوقع: {str(e)}")
+                    await update.message.reply_text(f"فشل تحويل الملف إلى MP4: {str(e)}. سيتم إرسال الملف كما هو.")
+            #and ends here
+            
             # إرسال الفيديو كرسالة فيديو (Video Note)
             if message.media.document.mime_type.startswith("video"):
                 await client.send_file(
