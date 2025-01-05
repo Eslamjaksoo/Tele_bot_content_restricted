@@ -1,4 +1,5 @@
 import os
+import imageio_ffmpeg as ffmpeg_path
 import subprocess
 import ffmpeg
 import nest_asyncio
@@ -9,10 +10,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
-#from googleapiclient.discovery import build
-#from google.oauth2.credentials import Credentials
-#from google.colab import drive
-#drive.mount('/content/drive')
+
 
 # إعداد Google Drive API
 #def initialize_drive():
