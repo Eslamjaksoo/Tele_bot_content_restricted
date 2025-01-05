@@ -290,13 +290,13 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     # فتح ملف الفيديو
                     clip = VideoFileClip(file_path)
 
-                    # إعادة ترميز الفيديو والصوت وحفظ الملف بصيغة MP4
+                    # حفظ الملف بصيغة MP4 مع إعدادات لتحسين الجودة
                     clip.write_videofile(
                         mp4_path,
-                        codec="libx264",         # ترميز الفيديو
-                        audio_codec="aac",       # ترميز الصوت
-                        preset="ultrafast",      # لتسريع العملية مع الحفاظ على الجودة
-                        threads=4                # استخدام 4 خيوط لتحسين الأداء
+                        codec="libx264",       # ترميز الفيديو
+                        audio_codec="aac",     # ترميز الصوت
+                        preset="medium",       # تحسين الجودة مع سرعة معقولة
+                        ffmpeg_params=["-crf", "18", "-b:v", "3M"]  # جودة شبه مثالية
                     )
 
                     # إغلاق الملف
@@ -306,11 +306,10 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     os.remove(file_path)
                     file_path = mp4_path
 
-                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح مع الحفاظ على الجودة.")
+                    await update.message.reply_text("تم تحويل الملف إلى MP4 بجودة عالية بنجاح.")
 
                 except Exception as e:
                     await update.message.reply_text(f"فشل تحويل الملف إلى MP4 باستخدام MoviePy: {str(e)}. سيتم إرسال الملف كما هو.")
-            
             
             #and ends here
             
