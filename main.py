@@ -285,22 +285,30 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 mp4_path = os.path.splitext(file_path)[0] + '.mp4'
                 try:
                     await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4 باستخدام MoviePy...")
-        
-                    clip = VideoFileClip(file_path, target_resolution=(720, 1280))  # حدد دقة الفيديو إذا لزم
+
+                    # فتح ملف الفيديو
+                    clip = VideoFileClip(file_path)  # الحفاظ على الدقة الأصلية للفيديو
+
+                    # حفظ الملف بصيغة MP4
                     clip.write_videofile(
                         mp4_path,
-                        codec="mpeg4",  # استخدم ترميز MPEG4 لتجنب الاعتماد على FFMPEG
-                        audio_codec="aac"
+                        codec="mpeg4",          # ترميز MPEG4
+                        audio_codec="aac",      # ترميز الصوت AAC
+                        verbose=False,          # تعطيل رسائل MoviePy
+                        progress_bar=False      # تعطيل شريط التقدم
                     )
-        
+
+                    # إغلاق الملف
                     clip.close()
+
+                    # حذف الملف الأصلي بعد التحويل
                     os.remove(file_path)
                     file_path = mp4_path
+
                     await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح باستخدام MoviePy.")
     
                 except Exception as e:
                     await update.message.reply_text(f"فشل تحويل الملف إلى MP4 باستخدام MoviePy: {str(e)}. سيتم إرسال الملف كما هو.")
-            
             #and ends here
             
             # إرسال الفيديو كرسالة فيديو (Video Note)
