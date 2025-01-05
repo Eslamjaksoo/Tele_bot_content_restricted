@@ -282,7 +282,6 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # here start convert step to mp4
 
-
             if file_path.endswith('.MOV'):  # التحقق إذا كان الملف بصيغة MOV
                 mp4_path = os.path.splitext(file_path)[0] + '.mp4'
                 try:
@@ -291,11 +290,14 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     # فتح ملف الفيديو
                     clip = VideoFileClip(file_path)
 
-                    # حفظ الملف بصيغة MP4 دون إعادة ترميز
+                    # إعادة ترميز الفيديو والصوت وحفظ الملف بصيغة MP4
                     clip.write_videofile(
                         mp4_path,
-                        codec="copy",        # نسخ الفيديو دون إعادة ترميز
-                            )
+                        codec="libx264",         # ترميز الفيديو
+                        audio_codec="aac",       # ترميز الصوت
+                        preset="ultrafast",      # لتسريع العملية مع الحفاظ على الجودة
+                        threads=4                # استخدام 4 خيوط لتحسين الأداء
+                    )
 
                     # إغلاق الملف
                     clip.close()
@@ -304,11 +306,11 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     os.remove(file_path)
                     file_path = mp4_path
 
-                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح بنفس الجودة والحجم.")
+                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح مع الحفاظ على الجودة.")
 
                 except Exception as e:
                     await update.message.reply_text(f"فشل تحويل الملف إلى MP4 باستخدام MoviePy: {str(e)}. سيتم إرسال الملف كما هو.")
-
+            
             
             #and ends here
             
