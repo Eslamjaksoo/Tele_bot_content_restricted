@@ -281,18 +281,23 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await progress_message.edit_text("جاري إرسال الملف...")
 
             # here start convert step to mp4
- 
-            if file_path.endswith('.MOV'):  # التحقق من صيغة الفيديو
+            if file_path.endswith('.MOV'):  # التحقق إذا كان الملف بصيغة MOV
                 mp4_path = os.path.splitext(file_path)[0] + '.mp4'
                 try:
                     await update.message.reply_text("جاري محاولة تحويل الملف إلى MP4 باستخدام MoviePy...")
-                    clip = VideoFileClip(file_path)
-                    clip.write_videofile(mp4_path, codec="libx264", audio_codec="aac")  # التحويل
+        
+                    clip = VideoFileClip(file_path, target_resolution=(720, 1280))  # حدد دقة الفيديو إذا لزم
+                    clip.write_videofile(
+                        mp4_path,
+                        codec="mpeg4",  # استخدم ترميز MPEG4 لتجنب الاعتماد على FFMPEG
+                        audio_codec="aac"
+                    )
+        
                     clip.close()
-
-                    os.remove(file_path)  # حذف الملف الأصلي بعد التحويل
-                    file_path = mp4_path  # تحديث المسار الجديد
+                    os.remove(file_path)
+                    file_path = mp4_path
                     await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح باستخدام MoviePy.")
+    
                 except Exception as e:
                     await update.message.reply_text(f"فشل تحويل الملف إلى MP4 باستخدام MoviePy: {str(e)}. سيتم إرسال الملف كما هو.")
             
