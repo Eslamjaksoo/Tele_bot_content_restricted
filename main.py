@@ -292,7 +292,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     # حفظ الملف بصيغة MP4
                     clip.write_videofile(
                         mp4_path,
-                        codec="mpeg4",          # ترميز MPEG4
+                        codec="libx264",          # ترميز MPEG4
                         audio_codec="aac",      # ترميز الصوت AAC
                         )
 
