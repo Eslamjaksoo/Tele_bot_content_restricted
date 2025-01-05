@@ -282,6 +282,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # here start convert step to mp4
 
+
             if file_path.endswith('.MOV'):  # التحقق إذا كان الملف بصيغة MOV
                 mp4_path = os.path.splitext(file_path)[0] + '.mp4'
                 try:
@@ -290,27 +291,26 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     # فتح ملف الفيديو
                     clip = VideoFileClip(file_path)
 
-                    # حفظ الملف بصيغة MP4 مع الحفاظ على الجودة الأصلية
+                    # حفظ الملف بصيغة MP4 مع ضبط الإعدادات لتجنب مشاكل Broken Pipe
                     clip.write_videofile(
                         mp4_path,
-                        codec="libx264",       # استخدام ترميز x264 للحفاظ على الجودة
-                        audio_codec="aac",     # ترميز الصوت AAC
-                        preset="slow",         # إعداد بطيء للحصول على ضغط عالي الجودة
-                        ffmpeg_params=["-crf", "18"],  # تعيين CRF (قيمة الجودة: 18 يعني جودة عالية)
+                        codec="libx264",       # ترميز الفيديو
+                        audio_codec="aac",     # ترميز الصوت
+                        preset="ultrafast",    # تقليل الحمل على المعالج
+                        ffmpeg_params=["-crf", "23", "-b:v", "1M"]  # جودة متوسطة لتجنب المشاكل
                     )
 
                     # إغلاق الملف
                     clip.close()
-            
+
                     # حذف الملف الأصلي بعد التحويل
                     os.remove(file_path)
                     file_path = mp4_path
 
-                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح مع الحفاظ على الجودة.")
-    
+                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
+
                 except Exception as e:
                     await update.message.reply_text(f"فشل تحويل الملف إلى MP4 باستخدام MoviePy: {str(e)}. سيتم إرسال الملف كما هو.")
-
         
             #and ends here
             
