@@ -291,13 +291,11 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     # فتح ملف الفيديو
                     clip = VideoFileClip(file_path)
 
-                    # حفظ الملف بصيغة MP4 مع ضبط الإعدادات لتجنب مشاكل Broken Pipe
+                    # حفظ الملف بصيغة MP4 دون إعادة ترميز
                     clip.write_videofile(
                         mp4_path,
-                        codec="libx264",       # ترميز الفيديو
-                        audio_codec="aac",     # ترميز الصوت
-                        preset="ultrafast",    # تقليل الحمل على المعالج
-                        ffmpeg_params=["-crf", "23", "-b:v", "1M"]  # جودة متوسطة لتجنب المشاكل
+                        codec="copy",        # نسخ الفيديو دون إعادة ترميز
+                        audio_codec="copy"   # نسخ الصوت دون إعادة ترميز
                     )
 
                     # إغلاق الملف
@@ -307,11 +305,12 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     os.remove(file_path)
                     file_path = mp4_path
 
-                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح.")
+                    await update.message.reply_text("تم تحويل الملف إلى MP4 بنجاح بنفس الجودة والحجم.")
 
                 except Exception as e:
                     await update.message.reply_text(f"فشل تحويل الملف إلى MP4 باستخدام MoviePy: {str(e)}. سيتم إرسال الملف كما هو.")
-        
+
+            
             #and ends here
             
             # إرسال الفيديو كرسالة فيديو (Video Note)
