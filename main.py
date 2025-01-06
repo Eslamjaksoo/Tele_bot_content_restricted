@@ -25,7 +25,7 @@ def initialize_drive():
     service = build('drive', 'v3', credentials=creds)
     return service
 
-
+drive_service = initialize_drive()
 
 nest_asyncio.apply()
 
