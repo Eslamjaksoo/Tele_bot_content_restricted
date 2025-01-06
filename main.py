@@ -11,19 +11,9 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 from moviepy.video.io.VideoFileClip import VideoFileClip
-
-# إعداد Google Drive API
-#def initialize_drive():
-#    SCOPES = ['https://www.googleapis.com/auth/drive']
-#    creds = Credentials.from_authorized_user_file('credentials.json', SCOPES)
-#    service = build('drive', 'v3', credentials=creds)
-#    return service
-
-# تهيئة Google Drive
-#drive_service = initialize_drive()
-
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials  # استخدام مكتبة الحساب الخدمي
+
 
 # معرف المجلد الذي شاركته مع حساب الخدمة
 FOLDER_ID = '1KQuUFlVRXkwNA6I11caLJV-W6ALiEN61'
@@ -34,38 +24,6 @@ def initialize_drive():
     creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
     service = build('drive', 'v3', credentials=creds)
     return service
-#####↓↓↓↓↓↓
-FOLDER_ID = '1KQuUFlVRXkwNA6I11caLJV-W6ALiEN61'
-try:
-    drive_service = initialize_drive()
-    print("تم الاتصال بـ Google Drive بنجاح.")
-    
-    # كود اختبار إنشاء ملف
-    file_metadata = {
-        'name': 'test_creation.txt',  # اسم الملف
-        'parents': [FOLDER_ID],
-        'mimeType': 'text/plain',     # نوع الملف
-    }
-    test_file = drive_service.files().create(body=file_metadata, fields='id').execute()
-    print(f"تم إنشاء ملف اختبار بنجاح: File ID: {test_file.get('id')}")
-
-except Exception as e:
-    print(f"حدث خطأ أثناء الاتصال بـ Google Drive أو اختبار إنشاء الملف: {e}")
-#####^^^^^
-# تهيئة Google Drive
-#try:
-#    drive_service = initialize_drive()
-#    print("تم الاتصال بـ Google Drive بنجاح.")
-#except Exception as e:
-#    print(f"حدث خطأ أثناء الاتصال بـ Google Drive: {e}")
-
-#يعرف اذا كان اداه التحويل موجودة ام لا
-
-try:
-    subprocess.run(["ffmpeg", "-version"], check=True)
-    print("ffmpeg is installed and available.")
-except FileNotFoundError:
-    print("ffmpeg is not installed.")
 
 
 
