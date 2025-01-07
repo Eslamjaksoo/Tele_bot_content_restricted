@@ -25,8 +25,38 @@ def initialize_google_sheet():
 google_sheet = initialize_google_sheet()
 
 def add_user_to_sheet(user_id, phone_number, username, is_banned):
-    global google_sheet
-    google_sheet.append_row([user_id, phone_number, username or "N/A", "Banned" if is_banned else "Not Banned"])
+    # فتح Google Sheet
+    sheet = sheet_service.spreadsheets()
+    sheet_id = 'ID_1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY'
+    range_name = 'Sheet1!A:D'  # نطاق البيانات (تعديل حسب الجدول)
+    
+    # الحصول على جميع البيانات الحالية
+    result = sheet.values().get(spreadsheetId=sheet_id, range=range_name).execute()
+    values = result.get('values', [])
+    
+    # البحث عن الصف الخاص بالمستخدم
+    for i, row in enumerate(values):
+        if str(user_id) in row:  # التحقق إذا كان معرف المستخدم موجودًا
+            # تعديل قيمة الحظر في الصف الحالي
+            row[3] = 'True' if is_banned else 'False'
+            update_range = f'Sheet1!A{i+1}:D{i+1}'  # تحديد الصف الذي سيتم تحديثه
+            sheet.values().update(
+                spreadsheetId=sheet_id,
+                range=update_range,
+                valueInputOption='RAW',
+                body={'values': [row]}
+            ).execute()
+            return  # لا حاجة لإضافة صف جديد
+        
+    # إذا لم يكن موجودًا، أضف صفًا جديدًا
+    new_row = [str(user_id), phone_number, username or 'N/A', 'True' if is_banned else 'False']
+    sheet.values().append(
+        spreadsheetId=sheet_id,
+        range=range_name,
+        valueInputOption='RAW',
+        body={'values': [new_row]}
+    ).execute()
+
 
 
 def load_banned_users():
@@ -359,45 +389,39 @@ async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
         return
 
-    # التحقق من تقديم معرف المستخدم كمعامل
     if len(context.args) == 0:
         await update.message.reply_text("يرجى استخدام الأمر هكذا: /ban_user <user_id>")
         return
 
     try:
-        # إضافة المستخدم إلى قائمة المحظورين
         target_user_id = int(context.args[0])
         banned_users.add(target_user_id)
-        add_user_to_sheet(target_user_id, None, None, True)
+        add_user_to_sheet(target_user_id, "N/A", "N/A", True)  # تعديل حالة الحظر
         await update.message.reply_text(f"تم حظر المستخدم {target_user_id} بنجاح.")
-
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
+
 
 
 async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # التحقق من صلاحية المشرف
     if user_id != admin_id:
         await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
         return
 
-    # التحقق من تقديم معرف المستخدم كمعامل
     if len(context.args) == 0:
         await update.message.reply_text("يرجى استخدام الأمر هكذا: /unban_user <user_id>")
         return
 
     try:
-        # إزالة المستخدم من قائمة المحظورين
         target_user_id = int(context.args[0])
         banned_users.discard(target_user_id)
-        add_user_to_sheet(target_user_id, None, None, False)
+        add_user_to_sheet(target_user_id, "N/A", "N/A", False)  # تعديل حالة الحظر
         await update.message.reply_text(f"تم إلغاء حظر المستخدم {target_user_id} بنجاح.")
-
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
-
+        
 
 
 
