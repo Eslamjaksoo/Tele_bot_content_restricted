@@ -15,6 +15,10 @@ from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials  # استخدام مكتبة الحساب الخدمي
 
 
+
+banned_users = set()  # قائمة معرفات المستخدمين المحظورين
+admin_id = 743875052  # ضع معرفك كمشرف (استبدل <YOUR_ADMIN_ID> بمعرفك الخاص)
+
 # معرف المجلد الذي شاركته مع حساب الخدمة
 FOLDER_ID = '1KQuUFlVRXkwNA6I11caLJV-W6ALiEN61'
 
@@ -209,6 +213,10 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("لم يتم تسجيل الدخول. الرجاء استخدام /start لبدء العملية.")
         return ConversationHandler.END
 
+    if update.message.from_user.id in banned_users:
+    await update.message.reply_text("تم حظرك من استخدام هذا البوت.")
+    return
+    
     try:
         # تحميل الكيانات مسبقًا
         await client.get_dialogs()
@@ -317,6 +325,54 @@ async def disconnect_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     else:
         await update.message.reply_text("لا توجد جلسة نشطة لإغلاقها.")
 
+async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+
+    # التحقق من صلاحية المشرف
+    if user_id != admin_id:
+        await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
+        return
+
+    # التحقق من تقديم معرف المستخدم كمعامل
+    if len(context.args) == 0:
+        await update.message.reply_text("يرجى استخدام الأمر هكذا: /ban_user <user_id>")
+        return
+
+    try:
+        # إضافة المستخدم إلى قائمة المحظورين
+        target_user_id = int(context.args[0])
+        banned_users.add(target_user_id)
+        await update.message.reply_text(f"تم حظر المستخدم {target_user_id} بنجاح.")
+
+    except ValueError:
+        await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
+
+
+async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+
+    # التحقق من صلاحية المشرف
+    if user_id != admin_id:
+        await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
+        return
+
+    # التحقق من تقديم معرف المستخدم كمعامل
+    if len(context.args) == 0:
+        await update.message.reply_text("يرجى استخدام الأمر هكذا: /unban_user <user_id>")
+        return
+
+    try:
+        # إزالة المستخدم من قائمة المحظورين
+        target_user_id = int(context.args[0])
+        banned_users.discard(target_user_id)
+        await update.message.reply_text(f"تم إلغاء حظر المستخدم {target_user_id} بنجاح.")
+
+    except ValueError:
+        await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
+
+
+
+
 async def connection_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     client = clients.get(user_id)
@@ -345,6 +401,8 @@ if __name__ == "__main__":
     )
 
     app.add_handler(conv_handler)
+    app.add_handler(CommandHandler("ban_user", ban_user))
+    app.add_handler(CommandHandler("unban_user", unban_user))
     app.add_handler(CommandHandler("connection", connection_command))
     app.add_handler(CommandHandler("disconnect", disconnect_command))
 
