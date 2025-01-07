@@ -377,7 +377,7 @@ async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if len(context.args) == 0:
-        await update.message.reply_text("يرجى استخدام الأمر هكذا: /ban_user <user_id>")
+        await update.message.reply_text("يرجى استخدام الأمر هكذا: /ban <user_id>")
         return
 
     try:
@@ -398,7 +398,7 @@ async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if len(context.args) == 0:
-        await update.message.reply_text("يرجى استخدام الأمر هكذا: /unban_user <user_id>")
+        await update.message.reply_text("يرجى استخدام الأمر هكذا: /unban <user_id>")
         return
 
     try:
@@ -440,8 +440,8 @@ if __name__ == "__main__":
     )
 
     app.add_handler(conv_handler)
-    app.add_handler(CommandHandler("ban_user", ban_user))
-    app.add_handler(CommandHandler("unban_user", unban_user))
+    app.add_handler(CommandHandler("ban", ban_user))
+    app.add_handler(CommandHandler("unban", unban_user))
     app.add_handler(CommandHandler("connection", connection_command))
     app.add_handler(CommandHandler("disconnect", disconnect_command))
 
