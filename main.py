@@ -25,37 +25,24 @@ def initialize_google_sheet():
 google_sheet = initialize_google_sheet()
 
 def add_user_to_sheet(user_id, phone_number, username, is_banned):
-    # فتح Google Sheet
-    sheet = google_sheet.spreadsheets()
-    sheet_id = 'ID_1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY'
-    range_name = 'Sheet1!A:D'  # نطاق البيانات (تعديل حسب الجدول)
+    # الحصول على Google Sheet عبر google_sheet الذي تم تعريفه مسبقًا
+    sheet = google_sheet
     
-    # الحصول على جميع البيانات الحالية
-    result = sheet.values().get(spreadsheetId=sheet_id, range=range_name).execute()
-    values = result.get('values', [])
+    # الحصول على جميع البيانات الحالية من الورقة
+    values = sheet.get_all_values()
     
     # البحث عن الصف الخاص بالمستخدم
     for i, row in enumerate(values):
         if str(user_id) in row:  # التحقق إذا كان معرف المستخدم موجودًا
             # تعديل قيمة الحظر في الصف الحالي
             row[3] = 'True' if is_banned else 'False'
-            update_range = f'Sheet1!A{i+1}:D{i+1}'  # تحديد الصف الذي سيتم تحديثه
-            sheet.values().update(
-                spreadsheetId=sheet_id,
-                range=update_range,
-                valueInputOption='RAW',
-                body={'values': [row]}
-            ).execute()
+            update_range = f'A{i+1}:D{i+1}'  # تحديد الصف الذي سيتم تحديثه
+            sheet.update(update_range, [row])
             return  # لا حاجة لإضافة صف جديد
-        
+    
     # إذا لم يكن موجودًا، أضف صفًا جديدًا
     new_row = [str(user_id), phone_number, username or 'N/A', 'True' if is_banned else 'False']
-    sheet.values().append(
-        spreadsheetId=sheet_id,
-        range=range_name,
-        valueInputOption='RAW',
-        body={'values': [new_row]}
-    ).execute()
+    sheet.append_row(new_row)
 
 
 
