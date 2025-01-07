@@ -214,7 +214,7 @@ async def process_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
     if update.message.from_user.id in banned_users:
-    await update.message.reply_text("تم حظرك من استخدام هذا البوت.")
+        await update.message.reply_text("تم حظرك من استخدام هذا البوت.")
     return
     
     try:
