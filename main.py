@@ -26,7 +26,7 @@ google_sheet = initialize_google_sheet()
 
 def add_user_to_sheet(user_id, phone_number, username, is_banned):
     # فتح Google Sheet
-    sheet = sheet_service.spreadsheets()
+    sheet = google_sheet.spreadsheets()
     sheet_id = 'ID_1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY'
     range_name = 'Sheet1!A:D'  # نطاق البيانات (تعديل حسب الجدول)
     
