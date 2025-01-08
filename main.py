@@ -64,17 +64,6 @@ def add_user_to_sheet(user_id, phone_number=None, username=None, is_banned=None)
 
 
 
-def ban_user(user_id, phone_number=None, username=None):
-    # استدعاء الوظيفة مع is_banned=True لحظر المستخدم
-    add_user_to_sheet(user_id, phone_number, username, is_banned=True)
-
-def unban_user(user_id):
-    # استدعاء الوظيفة مع is_banned=False لفك الحظر
-    add_user_to_sheet(user_id, is_banned=False)
-
-
-
-
 
 
 def load_banned_users():
