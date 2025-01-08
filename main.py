@@ -25,24 +25,27 @@ def initialize_google_sheet():
 google_sheet = initialize_google_sheet()
 
 def add_user_to_sheet(user_id, phone_number, username, is_banned):
-    # الحصول على Google Sheet عبر google_sheet الذي تم تعريفه مسبقًا
     sheet = google_sheet
-    
-    # الحصول على جميع البيانات الحالية من الورقة
     values = sheet.get_all_values()
     
     # البحث عن الصف الخاص بالمستخدم
     for i, row in enumerate(values):
-        if str(user_id) in row:  # التحقق إذا كان معرف المستخدم موجودًا
-            # تعديل قيمة الحظر في الصف الحالي
-            row[3] = 'True' if is_banned else 'False'
-            update_range = f'A{i+1}:D{i+1}'  # تحديد الصف الذي سيتم تحديثه
+        if str(user_id) in row:
+            # تعديل البيانات الناقصة فقط
+            if not row[1]:  # إذا كان رقم الهاتف مفقودًا
+                row[1] = phone_number
+            if not row[2]:  # إذا كان اسم المستخدم مفقودًا
+                row[2] = username or 'N/A'
+            # الاحتفاظ بحالة الحظر كما هي
+            row[3] = 'True' if row[3] == 'True' or is_banned else 'False'
+            update_range = f'A{i+1}:D{i+1}'
             sheet.update(update_range, [row])
-            return  # لا حاجة لإضافة صف جديد
+            return
     
     # إذا لم يكن موجودًا، أضف صفًا جديدًا
     new_row = [str(user_id), phone_number, username or 'N/A', 'True' if is_banned else 'False']
     sheet.append_row(new_row)
+
 
 
 
