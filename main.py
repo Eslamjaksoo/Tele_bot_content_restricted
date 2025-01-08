@@ -24,6 +24,7 @@ def initialize_google_sheet():
 
 google_sheet = initialize_google_sheet()
 
+
 def add_user_to_sheet(user_id, phone_number, username, is_banned):
     # الحصول على Google Sheet عبر google_sheet الذي تم تعريفه مسبقًا
     sheet = google_sheet
@@ -39,6 +40,10 @@ def add_user_to_sheet(user_id, phone_number, username, is_banned):
                 row[1] = phone_number
             if (not row[2] or row[2] == 'N/A') and username:
                 row[2] = username
+            
+            # الاحتفاظ بحالة الحظر السابقة إذا كانت True
+            if row[3] == 'True':
+                is_banned = True
             
             # تعديل قيمة الحظر في الصف الحالي
             row[3] = 'True' if is_banned else 'False'
