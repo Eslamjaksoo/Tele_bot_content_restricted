@@ -388,49 +388,51 @@ async def disconnect_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     else:
         await update.message.reply_text("لا توجد جلسة نشطة لإغلاقها.")
 
+######
 
-async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE, admin_id, banned_users):
+# دالة حظر المستخدم
+async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # التحقق من صلاحية المشرف
+    # التحقق من صلاحيات المشرف
     if user_id != admin_id:
         await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
         return
 
-    if len(context.args) == 0:
+    if not context.args:
         await update.message.reply_text("يرجى استخدام الأمر هكذا: /ban <user_id>")
         return
 
     try:
         target_user_id = int(context.args[0])
         banned_users.add(target_user_id)
-        add_user_to_sheet(target_user_id, "N/A", "N/A", True)  # تعديل حالة الحظر
         await update.message.reply_text(f"تم حظر المستخدم {target_user_id} بنجاح.")
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
 
-
-async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE, admin_id, banned_users):
+# دالة إلغاء حظر المستخدم
+async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
 
-    # التحقق من صلاحية المشرف
+    # التحقق من صلاحيات المشرف
     if user_id != admin_id:
         await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
         return
 
-    if len(context.args) == 0:
+    if not context.args:
         await update.message.reply_text("يرجى استخدام الأمر هكذا: /unban <user_id>")
         return
 
     try:
         target_user_id = int(context.args[0])
         banned_users.discard(target_user_id)
-        add_user_to_sheet(target_user_id, "N/A", "N/A", False)  # تعديل حالة الحظر
         await update.message.reply_text(f"تم إلغاء حظر المستخدم {target_user_id} بنجاح.")
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
 
 
+
+#####
 
 async def connection_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
