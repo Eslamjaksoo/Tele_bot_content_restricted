@@ -397,7 +397,13 @@ async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         target_user_id = int(context.args[0])
+        
+        # تحديث الحظر في Google Sheets
+        add_user_to_sheet(user_id=target_user_id, is_banned=True)
+        
+        # تحديث القائمة المحلية للمحظورين
         banned_users.add(target_user_id)
+
         await update.message.reply_text(f"تم حظر المستخدم {target_user_id} بنجاح.")
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
@@ -417,12 +423,17 @@ async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         target_user_id = int(context.args[0])
+
+        # تحديث الحظر في Google Sheets
+        add_user_to_sheet(user_id=target_user_id, is_banned=False)
+        
+        # تحديث القائمة المحلية للمحظورين
         banned_users.discard(target_user_id)
+
         await update.message.reply_text(f"تم إلغاء حظر المستخدم {target_user_id} بنجاح.")
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
-
-
+        
 
 #####
 
