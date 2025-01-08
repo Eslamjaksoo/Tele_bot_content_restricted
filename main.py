@@ -45,10 +45,12 @@ def add_user_to_sheet(user_id, phone_number=None, username=None, is_banned=None)
             # تحديث حالة الحظر فقط إذا تم تمرير is_banned كـ True أو False
             # ولا يتم تعديلها إذا كانت موجودة مسبقًا ومساوية لـ True
             if is_banned is not None:
-                if row[3] == 'True' and is_banned == False:
-                    row[3] = 'False'
-                elif row[3] == 'False' and is_banned == True:
+                if row[3] == 'True':  # إذا كان المستخدم محظورًا، لا يتم تغيير الحظر
+                    pass
+                elif is_banned == True:
                     row[3] = 'True'
+                elif is_banned == False and row[3] != 'True':  # تحديث فقط إذا لم يكن محظورًا مسبقًا
+                    row[3] = 'False'
             
             # تحديث الصف بالكامل
             update_range = f'A{i+1}:D{i+1}'
@@ -58,6 +60,9 @@ def add_user_to_sheet(user_id, phone_number=None, username=None, is_banned=None)
     # إذا لم يكن موجودًا، أضف صفًا جديدًا
     new_row = [str(user_id), phone_number or 'N/A', username or 'N/A', 'True' if is_banned else 'False']
     sheet.append_row(new_row)
+
+
+
 
 def ban_user(user_id, phone_number=None, username=None):
     # استدعاء الوظيفة مع is_banned=True لحظر المستخدم
