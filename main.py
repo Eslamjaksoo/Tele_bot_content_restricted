@@ -388,7 +388,8 @@ async def disconnect_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     else:
         await update.message.reply_text("لا توجد جلسة نشطة لإغلاقها.")
 
-async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE, admin_id, banned_users):
     user_id = update.message.from_user.id
 
     # التحقق من صلاحية المشرف
@@ -409,10 +410,10 @@ async def ban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
 
 
-
-async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE, admin_id, banned_users):
     user_id = update.message.from_user.id
 
+    # التحقق من صلاحية المشرف
     if user_id != admin_id:
         await update.message.reply_text("ليس لديك الصلاحية لاستخدام هذا الأمر.")
         return
@@ -428,7 +429,6 @@ async def unban_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"تم إلغاء حظر المستخدم {target_user_id} بنجاح.")
     except ValueError:
         await update.message.reply_text("يرجى إدخال رقم معرف صالح.")
-        
 
 
 
