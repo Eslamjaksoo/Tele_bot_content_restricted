@@ -46,7 +46,7 @@ def add_user_to_sheet(user_id, phone_number=None, username=None, is_banned=None)
                 row[3] = 'True' if is_banned else 'False'
             
             # تحديث الصف بالكامل
-            update_range = f'A{i+1}:D{i+1}'
+            update_range = f'A{i+1}:C{i+1}'
             sheet.update(update_range, [row])
             return  # لا حاجة لإضافة صف جديد
     
