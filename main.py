@@ -25,7 +25,7 @@ def initialize_google_sheet():
 google_sheet = initialize_google_sheet()
 
 
-def add_user_to_sheet(user_id, phone_number, username, is_banned):
+def add_user_to_sheet(user_id, phone_number=None, username=None, is_banned=None):
     # الحصول على Google Sheet عبر google_sheet الذي تم تعريفه مسبقًا
     sheet = google_sheet
     
@@ -41,12 +41,9 @@ def add_user_to_sheet(user_id, phone_number, username, is_banned):
             if (not row[2] or row[2] == 'N/A') and username:
                 row[2] = username
             
-            # الاحتفاظ بحالة الحظر السابقة إذا كانت True
-            if row[3] == 'True':
-                is_banned = True
-            
-            # تعديل قيمة الحظر في الصف الحالي
-            row[3] = 'True' if is_banned else 'False'
+            # تحديث حالة الحظر فقط إذا تم تمرير is_banned كـ True أو False
+            if is_banned is not None:
+                row[3] = 'True' if is_banned else 'False'
             
             # تحديث الصف بالكامل
             update_range = f'A{i+1}:D{i+1}'
@@ -56,6 +53,14 @@ def add_user_to_sheet(user_id, phone_number, username, is_banned):
     # إذا لم يكن موجودًا، أضف صفًا جديدًا
     new_row = [str(user_id), phone_number or 'N/A', username or 'N/A', 'True' if is_banned else 'False']
     sheet.append_row(new_row)
+
+def ban_user(user_id, phone_number=None, username=None):
+    # استدعاء الوظيفة مع is_banned=True لحظر المستخدم
+    add_user_to_sheet(user_id, phone_number, username, is_banned=True)
+
+def unban_user(user_id):
+    # استدعاء الوظيفة مع is_banned=False لفك الحظر
+    add_user_to_sheet(user_id, is_banned=False)
 
 
 
