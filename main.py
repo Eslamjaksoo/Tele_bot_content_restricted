@@ -81,7 +81,7 @@ def load_banned_users():
     global google_sheet
     rows = google_sheet.get_all_records()
     for row in rows:
-        if row.get("Banned") == "Banned":
+        if row.get("Banned") == "True":
             banned_users.add(int(row.get("User ID")))
 
 
