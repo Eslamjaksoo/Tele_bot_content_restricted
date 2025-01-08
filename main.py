@@ -27,41 +27,33 @@ google_sheet = initialize_google_sheet()
 
 
 def add_user_to_sheet(user_id, phone_number=None, username=None, is_banned=None):
-    # الحصول على Google Sheet عبر google_sheet الذي تم تعريفه مسبقًا
+    # الحصول على الورقة
     sheet = google_sheet
     
-    # الحصول على جميع البيانات الحالية من الورقة
+    # جميع البيانات الحالية
     values = sheet.get_all_values()
     
     # البحث عن الصف الخاص بالمستخدم
     for i, row in enumerate(values):
-        if str(user_id) in row:  # التحقق إذا كان معرف المستخدم موجودًا
-            # تحديث المعلومات إذا كانت ناقصة أو فارغة
-            if (not row[1] or row[1] == 'N/A') and phone_number:
+        if str(user_id) in row:  # إذا كان المستخدم موجودًا
+            # تحديث المعلومات (رقم الهاتف واسم المستخدم)
+            if phone_number and (not row[1] or row[1] == 'N/A'):
                 row[1] = phone_number
-            if (not row[2] or row[2] == 'N/A') and username:
+            if username and (not row[2] or row[2] == 'N/A'):
                 row[2] = username
             
-            # تحديث حالة الحظر فقط إذا تم تمرير is_banned كـ True أو False
-            # ولا يتم تعديلها إذا كانت موجودة مسبقًا ومساوية لـ True
+            # تحديث حالة الحظر إذا تم تمريرها
             if is_banned is not None:
-                if row[3] == 'True':  # إذا كان المستخدم محظورًا، لا يتم تغيير الحظر
-                    pass
-                elif is_banned == True:
-                    row[3] = 'True'
-                elif is_banned == False and row[3] != 'True':  # تحديث فقط إذا لم يكن محظورًا مسبقًا
-                    row[3] = 'False'
+                row[3] = 'True' if is_banned else 'False'
             
-            # تحديث الصف بالكامل
-            update_range = f'A{i+1}:D{i+1}'
+            # تحديث الصف
+            update_range = f"A{i+1}:D{i+1}"
             sheet.update(update_range, [row])
-            return  # لا حاجة لإضافة صف جديد
+            return
     
     # إذا لم يكن موجودًا، أضف صفًا جديدًا
     new_row = [str(user_id), phone_number or 'N/A', username or 'N/A', 'True' if is_banned else 'False']
     sheet.append_row(new_row)
-
-
 
 
 
