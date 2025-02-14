@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     build-essential
 
+RUN apt-get update && apt-get install -y build-essential manpages-dev wget curl
+
 # تحميل وتثبيت GLIBC 2.38
 RUN wget http://ftp.gnu.org/gnu/libc/glibc-2.38.tar.gz && \
     tar -xvzf glibc-2.38.tar.gz && \
