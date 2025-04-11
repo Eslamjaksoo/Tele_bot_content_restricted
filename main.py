@@ -14,6 +14,7 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials  # استخدام مكتبة الحساب الخدمي
 import gspread
+import json
 
 import datetime
 print("Current time (UTC):", datetime.datetime.utcnow())
