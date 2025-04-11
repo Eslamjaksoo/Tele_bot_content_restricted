@@ -39,6 +39,12 @@
 # CMD ["python3", "main.py"]
 
 
+
+
+
+
+
+
 # استخدام إصدار محدد من Ubuntu بدلاً من latest
 FROM ubuntu:22.04
 
@@ -59,8 +65,8 @@ COPY . .
 # تثبيت المتطلبات
 RUN pip install --no-cache-dir -r requirements.txt
 
-# تعريف متغير PORT (مطلوب لمنصة Railway)
-ENV PORT=8080
+# تعيين متغير بيئة لتحديد نوع الخدمة
+ENV SERVICE_TYPE=worker
 
-# تشغيل السكريبت الأساسي
-CMD ["python3", "main.py"]
+# تشغيل السكريبت الأساسي بشكل صريح
+CMD ["python3", "-u", "main.py"]
