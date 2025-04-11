@@ -23,11 +23,19 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def initialize_google_sheet():
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    creds = Credentials.from_service_account_file('GOOGLE_CREDENTIALS.json', scopes=SCOPES)
-    client = gspread.authorize(creds)
+    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+    credentials_info = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
+    credentials = Credentials.from_service_account_info(credentials_info, scopes=scopes)
+    client = gspread.authorize(credentials)
     sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY/edit?usp=drivesdk").sheet1
     return sheet
+    
+# def initialize_google_sheet():
+#     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+#     creds = Credentials.from_service_account_file('GOOGLE_CREDENTIALS.json', scopes=SCOPES)
+#     client = gspread.authorize(creds)
+#     sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY/edit?usp=drivesdk").sheet1
+#     return sheet
 
 google_sheet = initialize_google_sheet()
 
