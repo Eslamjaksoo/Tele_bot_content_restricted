@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def initialize_google_sheet():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
+    creds = Credentials.from_service_account_file('GOOGLE_CREDENTIALS.json', scopes=SCOPES)
     client = gspread.authorize(creds)
     sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY/edit?usp=drivesdk').sheet1
     return sheet
@@ -81,7 +81,7 @@ FOLDER_ID = '1KQuUFlVRXkwNA6I11caLJV-W6ALiEN61'
 # إعداد Google Drive API باستخدام Service Account
 def initialize_drive():
     SCOPES = ['https://www.googleapis.com/auth/drive']
-    creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
+    creds = Credentials.from_service_account_file('GOOGLE_CREDENTIALS.json', scopes=SCOPES)
     service = build('drive', 'v3', credentials=creds)
     return service
 
