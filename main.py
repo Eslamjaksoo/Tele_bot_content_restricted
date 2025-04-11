@@ -15,6 +15,10 @@ from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials  # استخدام مكتبة الحساب الخدمي
 import gspread
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+
 def initialize_google_sheet():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
