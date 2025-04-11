@@ -44,29 +44,23 @@
 
 
 
-
-# استخدام إصدار محدد من Ubuntu بدلاً من latest
-FROM ubuntu:22.04
+# استخدام صورة Python الرسمية التي تحتوي على جميع المكتبات الأساسية
+FROM python:3.9-slim
 
 # تعيين مجلد العمل
 WORKDIR /app
 
-# تحديث النظام وتثبيت الأدوات الأساسية والمكتبات المطلوبة
+# تثبيت ffmpeg
 RUN apt-get update && apt-get install -y \
-    python3.9 \
-    python3-pip \
     ffmpeg \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# نسخ الملفات إلى الحاوية
+# نسخ ملفات المشروع
 COPY . .
 
 # تثبيت المتطلبات
 RUN pip install --no-cache-dir -r requirements.txt
 
-# تعيين متغير بيئة لتحديد نوع الخدمة
-ENV SERVICE_TYPE=worker
-
-# تشغيل السكريبت الأساسي بشكل صريح
-CMD ["python3", "-u", "main.py"]
+# تشغيل البوت
+CMD ["python", "main.py"]
