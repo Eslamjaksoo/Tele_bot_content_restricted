@@ -23,7 +23,7 @@ def initialize_google_sheet():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     creds = Credentials.from_service_account_file('GOOGLE_CREDENTIALS.json', scopes=SCOPES)
     client = gspread.authorize(creds)
-    sheet = client.open_by_url('https://docs.google.com/spreadsheets/d/1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY/edit?usp=drivesdk').sheet1
+    sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1t-RrbDvWSOKY1DVSuHnzRgfC-X1YlQXwCLsjqVsYuyY/edit?usp=drivesdk").sheet1
     return sheet
 
 google_sheet = initialize_google_sheet()
