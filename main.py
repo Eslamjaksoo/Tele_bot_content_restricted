@@ -102,7 +102,7 @@ drive_service = initialize_drive()
 nest_asyncio.apply()
 
 # إعدادات البوت
-bot_token = "8159077886:AAEzeVksfosancAMnx4nw1ouESneBnrnk_E"
+bot_token = "8159077886:AAE1QcgWg2Ci7HzP_Qn9hVnfUwNDEWaEqAc"
 
 # مراحل المحادثة
 PHONE, CODE, PASSWORD, FILE = range(4)
